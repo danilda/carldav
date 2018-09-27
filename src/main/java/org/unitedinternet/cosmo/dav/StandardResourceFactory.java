@@ -188,14 +188,14 @@ public class StandardResourceFactory implements DavResourceFactory, ExtendedDavC
         }
 
         if (collectionName != null) {
-            final CollectionItem userCollection = collectionRepository.findByCurrentOwnerEmailAndName(collectionName);
+            final CollectionItem userCollection = collectionRepository.findByCurrentOwnerEmailAndName(email, collectionName);
             if (userCollection == null) {
                 return null;
             }
             return createCollectionResource(locator, userCollection);
         }
 
-        final CollectionItem homeCollection = collectionRepository.findHomeCollectionByCurrentUser();
+        final CollectionItem homeCollection = collectionRepository.findHomeCollectionByOwnerEmail(email);
         return createCollectionResource(locator, homeCollection);
     }
 

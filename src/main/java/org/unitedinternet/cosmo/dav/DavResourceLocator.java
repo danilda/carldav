@@ -100,4 +100,6 @@ public interface DavResourceLocator {
     String itemUid();
 
     String contextPath();
+
+    String email();
 }

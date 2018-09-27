@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import static org.unitedinternet.cosmo.dav.caldav.CaldavConstants.*;
 
-public class StandardResourceFactory implements DavResourceFactory, ExtendedDavConstants{
+public class StandardResourceFactory implements DavResourceFactory, ExtendedDavConstants {
 
     private ContentService contentService;
     private ItemRepository itemRepository;
@@ -64,7 +64,7 @@ public class StandardResourceFactory implements DavResourceFactory, ExtendedDavC
      * </p>
      * <p>
      * If the identified resource does not exist and the request method
-     * indicates that one is to be created, returns a resource backed by a 
+     * indicates that one is to be created, returns a resource backed by a
      * newly-instantiated item that has not been persisted or assigned a UID.
      * Otherwise, if the resource does not exists, then a
      * {@link NotFoundException} is thrown.
@@ -87,18 +87,18 @@ public class StandardResourceFactory implements DavResourceFactory, ExtendedDavC
             // type is required
             WebDavResource parent = resolve(locator.getParentLocator());
             //TODO
-            if(parent != null && CALENDAR.equals(parent.getName())) {
+            if (parent != null && CALENDAR.equals(parent.getName())) {
                 final Item item = new Item();
                 item.setType(Item.Type.VEVENT);
                 return new DavCalendarResource(item, locator, this);
             }
             //TODO
-            if(parent != null && CONTACTS.equals(parent.getName())) {
+            if (parent != null && CONTACTS.equals(parent.getName())) {
                 return new DavCard(locator, this);
             }
         }
 
-        if(request.getMethod().equals("DELETE")) {
+        if (request.getMethod().equals("DELETE")) {
             return new DavCollectionBase(locator, this);
         }
 
@@ -114,7 +114,7 @@ public class StandardResourceFactory implements DavResourceFactory, ExtendedDavC
      * </p>
      */
     public WebDavResource resolve(DavResourceLocator locator)
-        throws CosmoDavException {
+            throws CosmoDavException {
         String uri = locator.getPath();
 
         UriTemplate.Match match = TEMPLATE_USER.match(uri);
@@ -136,11 +136,11 @@ public class StandardResourceFactory implements DavResourceFactory, ExtendedDavC
      * <code>Item</code> located by the given <code>DavResourceLocator</code>.
      * </p>
      */
-    public WebDavResource createResource(DavResourceLocator locator, Item item)  throws CosmoDavException {
+    public WebDavResource createResource(DavResourceLocator locator, Item item) throws CosmoDavException {
         Assert.notNull(item, "item cannot be null");
 
         //TODO
-        if(item.getName().endsWith(".vcf")) {
+        if (item.getName().endsWith(".vcf")) {
             return new DavCard(item, locator, this);
         }
 
@@ -177,18 +177,19 @@ public class StandardResourceFactory implements DavResourceFactory, ExtendedDavC
     private WebDavResource createUnknownResource(DavResourceLocator locator) {
         final String itemUid = locator.itemUid();
         final String collectionName = locator.collection();
+        final String email = locator.email();
 
-        if(collectionName != null && itemUid != null) {
-            final Item userItem = itemRepository.findByCurrentOwnerEmailAndCollectionNameAndName(collectionName, locator.itemUid());
-            if(userItem == null) {
+        if (collectionName != null && itemUid != null) {
+            final Item userItem = itemRepository.findByCurrentOwnerEmailAndCollectionNameAndName(email, collectionName, locator.itemUid());
+            if (userItem == null) {
                 return null;
             }
             return createResource(locator, userItem);
         }
 
-        if(collectionName != null) {
+        if (collectionName != null) {
             final CollectionItem userCollection = collectionRepository.findByCurrentOwnerEmailAndName(collectionName);
-            if(userCollection == null) {
+            if (userCollection == null) {
                 return null;
             }
             return createCollectionResource(locator, userCollection);
@@ -201,7 +202,7 @@ public class StandardResourceFactory implements DavResourceFactory, ExtendedDavC
     public ContentService getContentService() {
         return contentService;
     }
-    
+
     public CalendarQueryProcessor getCalendarQueryProcessor() {
         return calendarQueryProcessor;
     }

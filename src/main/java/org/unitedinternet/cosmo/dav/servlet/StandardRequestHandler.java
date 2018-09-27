@@ -25,13 +25,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
-import org.unitedinternet.cosmo.dav.CosmoDavException;
-import org.unitedinternet.cosmo.dav.DavResourceFactory;
-import org.unitedinternet.cosmo.dav.DavResourceLocatorFactory;
-import org.unitedinternet.cosmo.dav.MethodNotAllowedException;
-import org.unitedinternet.cosmo.dav.NotModifiedException;
-import org.unitedinternet.cosmo.dav.PreconditionFailedException;
-import org.unitedinternet.cosmo.dav.WebDavResource;
+import org.unitedinternet.cosmo.dav.*;
 import org.unitedinternet.cosmo.dav.impl.DavCalendarResource;
 import org.unitedinternet.cosmo.dav.provider.BaseProvider;
 import org.unitedinternet.cosmo.dav.provider.CalendarResourceProvider;
@@ -76,15 +70,17 @@ public class StandardRequestHandler extends AbstractController implements Server
             final WebDavResource resource = resolveTarget(request);
             preconditions(request, response, resource);
             process(request, response, resource);
+        } catch(NotFoundException e){
+            LOG.info("404 was happened");
+            final CosmoDavException de = exceptionResolverHandler.resolve(e);
+            ResponseUtils.sendDavError(de, response);
         } catch (Exception e) {
             final CosmoDavException de = exceptionResolverHandler.resolve(e);
-
             // We need a way to differentiate exceptions that are "expected" so that the
             // logs don't get too polluted with errors.  For example, OptimisticLockingFailureException
             // is expected and should be handled by the retry logic that is one layer above.
             // Although not ideal, for now simply check for this type and log at a different level.
             LOG.error("error (" + de.getErrorCode() + "): " + de.getMessage(), de);
-
             ResponseUtils.sendDavError(de, response);
         }
         return null;

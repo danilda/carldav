@@ -35,16 +35,16 @@ public class StandardResourceLocator implements DavResourceLocator {
 
     /**
      * @param context the URL specifying protocol, authority and unescaped
-     * base path
-     * @param path the unescaped dav-relative path of the resource
+     *                base path
+     * @param path    the unescaped dav-relative path of the resource
      * @param factory the locator factory
      */
     public StandardResourceLocator(URL context,
                                    String path,
                                    StandardResourceLocatorFactory factory) {
         this.context = context;
-        this.path = path.endsWith("/") && ! path.equals("/") ?
-            path.substring(0, path.length()-1) : path;
+        this.path = path.endsWith("/") && !path.equals("/") ?
+                path.substring(0, path.length() - 1) : path;
         this.factory = factory;
     }
 
@@ -65,11 +65,11 @@ public class StandardResourceLocator implements DavResourceLocator {
 
     public URL getUrl(boolean absolute,
                       boolean isCollection) {
-    try {
-        return new URL(getHref(absolute, isCollection));
-    } catch (Exception e) {
-        throw new CosmoException(e);
-    }
+        try {
+            return new URL(getHref(absolute, isCollection));
+        } catch (Exception e) {
+            throw new CosmoException(e);
+        }
     }
 
     public String getBaseHref() {
@@ -82,7 +82,7 @@ public class StandardResourceLocator implements DavResourceLocator {
                 return context.toURI().toASCIIString();
             }
             return new URI(null, null, context.getPath(), null).
-                toASCIIString();
+                    toASCIIString();
         } catch (Exception e) {
             throw new CosmoException(e);
         }
@@ -98,11 +98,16 @@ public class StandardResourceLocator implements DavResourceLocator {
 
     public DavResourceLocator getParentLocator() {
         return factory.createResourceLocatorByPath(context,
-                                             PathUtil.getParentPath(path));
+                PathUtil.getParentPath(path));
     }
 
     public DavResourceLocatorFactory getFactory() {
         return factory;
+    }
+
+    public String email() {
+        final String[] split = getPath().split("/");
+        return split.length > 2 ? split[2] : null;
     }
 
     @Override
@@ -126,44 +131,44 @@ public class StandardResourceLocator implements DavResourceLocator {
     private String buildHref(URL context, boolean isCollection, boolean absolute) throws URISyntaxException {
         String protocol = context.getProtocol();
         String host = context.getHost();
-        String path = isCollection && ! this.path.equals("/") ? this.path  + "/" : this.path;
+        String path = isCollection && !this.path.equals("/") ? this.path + "/" : this.path;
         path = context.getPath() + path;
         int port = context.getPort();
         StringBuilder sb = new StringBuilder();
-        
+
         if (protocol != null && absolute) {
             sb.append(protocol);
             sb.append(':');
         }
-        
+
         if (host != null && absolute) {
             sb.append("//");
-            
+
             boolean needBrackets = ((host.indexOf(':') >= 0)
-                                && !host.startsWith("[")
-                                && !host.endsWith("]"));
+                    && !host.startsWith("[")
+                    && !host.endsWith("]"));
             if (needBrackets) {
                 sb.append('[');
             }
-            
+
             sb.append(host);
-            
-            if (needBrackets){ 
+
+            if (needBrackets) {
                 sb.append(']');
             }
-            
+
             if (port != -1) {
                 sb.append(':');
                 sb.append(port);
             }
-            
+
         }
-        
-        if (path != null){
+
+        if (path != null) {
             sb.append(path);
         }
-        
-        if(isCollection && sb.charAt(sb.length()-1) != '/'){
+
+        if (isCollection && sb.charAt(sb.length() - 1) != '/') {
             sb.append("/");
         }
         return sb.toString();

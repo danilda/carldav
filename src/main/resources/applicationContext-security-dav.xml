@@ -12,9 +12,9 @@
 <!-- Security configuration for WebDAV -->
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:security="http://www.springframework.org/schema/security"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
     <bean id="authenticateWith401StatusCodeHandler" class="carldav.security.AuthenticateWith401StatusCodeHandler">
@@ -23,29 +23,31 @@
         </constructor-arg>
     </bean>
 
-	<security:http pattern="/**" use-expressions="true" create-session="stateless">
-		<security:access-denied-handler ref="authenticateWith401StatusCodeHandler" />
-		<security:intercept-url pattern="/user" access="hasRole('ROLE_ADMIN')" />
-		<security:intercept-url pattern="/dav/{email}/**" access="#email == authentication.name" />
-		<security:intercept-url pattern="/.well-known/**" access="denyAll()" />
-		<security:intercept-url pattern="/**" access="isFullyAuthenticated()" />
-		<security:http-basic entry-point-ref="authenticateWith401StatusCodeHandler" />
-		<security:csrf disabled="true" />
-	</security:http>
+    <security:http pattern="/**" use-expressions="true" create-session="stateless">
+        <security:access-denied-handler ref="authenticateWith401StatusCodeHandler"/>
+        <security:intercept-url pattern="/user" access="hasRole('ROLE_ADMIN')"/>
+        <security:intercept-url pattern="/dav/{email}/**" access="#email == authentication.name
+                                or hasRole('ROLE_ADMIN')
+                                or @userDetailsService.isUserManager(authentication.name, #email)"/>
+        <security:intercept-url pattern="/.well-known/**" access="denyAll()"/>
+        <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
+        <security:http-basic entry-point-ref="authenticateWith401StatusCodeHandler"/>
+        <security:csrf disabled="true"/>
+    </security:http>
 
-	<security:authentication-manager>
-		<security:authentication-provider user-service-ref="userDetailsService">
-			<security:password-encoder ref="passwordEncoder" />
-		</security:authentication-provider>
-	</security:authentication-manager>
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="userDetailsService">
+            <security:password-encoder ref="passwordEncoder"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
 
-	<bean id="userDetailsService" class="org.unitedinternet.cosmo.acegisecurity.userdetails.CosmoUserDetailsService">
-		<constructor-arg index="0" ref="userRepository" />
-	</bean>
+    <bean id="userDetailsService" class="org.unitedinternet.cosmo.acegisecurity.userdetails.CosmoUserDetailsService">
+        <constructor-arg index="0" ref="userRepository"/>
+    </bean>
 
-	<bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" />
+    <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"/>
 
-	<bean id="securityManager" class="org.unitedinternet.cosmo.security.CosmoSecurityManager" />
+    <bean id="securityManager" class="org.unitedinternet.cosmo.security.CosmoSecurityManager"/>
 
-	<bean class="org.springframework.security.data.repository.query.SecurityEvaluationContextExtension"/>
+    <bean class="org.springframework.security.data.repository.query.SecurityEvaluationContextExtension"/>
 </beans>

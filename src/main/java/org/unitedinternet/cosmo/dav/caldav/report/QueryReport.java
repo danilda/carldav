@@ -107,6 +107,12 @@ public class QueryReport extends CaldavMultiStatusReport {
                 getResults().add(dcr);
             }
             return;
+        } else if(resource instanceof DavCalendarCollection) {
+            DavCalendarResource dcr = (DavCalendarResource) resource;
+            if (dcr.matches(queryFilter)) {
+                getResults().add(dcr);
+            }
+            return;
         }
         // if the resource is a collection, it will not match a calendar
         // query, which only matches calendar resource, so we can ignore it

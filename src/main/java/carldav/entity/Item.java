@@ -24,12 +24,12 @@ import java.util.Date;
 
 @Entity
 @Table(name = "item",
-        indexes={@Index(name = "idx_itemuid",columnList = "uid" ),
-                 @Index(name = "idx_itemname",columnList = "itemname" ),
-                 @Index(name = "idx_startdt",columnList = "startdate"),
-                 @Index(name = "idx_enddt",columnList = "enddate"),
-                 @Index(name = "idx_floating",columnList = "floating"),
-                 @Index(name = "idx_recurring",columnList = "recurring")
+        indexes = {@Index(name = "idx_itemuid", columnList = "uid"),
+                @Index(name = "idx_itemname", columnList = "itemname"),
+                @Index(name = "idx_startdt", columnList = "startdate"),
+                @Index(name = "idx_enddt", columnList = "enddate"),
+                @Index(name = "idx_floating", columnList = "floating"),
+                @Index(name = "idx_recurring", columnList = "recurring")
         },
         uniqueConstraints = {@UniqueConstraint(name = "uid_collection", columnNames = {"uid", "collectionid"})}
 )
@@ -37,6 +37,19 @@ public class Item {
 
     public enum Type {
         VEVENT, VJOURNAL, VTODO, VCARD
+    }
+
+    public enum Status {
+        TENTATIVE, CONFIRMED, CANCELLED;
+
+        public static Status getStatus(String value){
+            for (Status s: Status.values()) {
+                if (s.name().equals(value)) {
+                    return s;
+                }
+            }
+            throw new IllegalArgumentException("Status with value: \"" + value + "\" not exists!");
+        }
     }
 
     private Long id;
@@ -54,8 +67,13 @@ public class Item {
     private Date clientCreationDate;
     private Date clientModifiedDate;
     private Type type;
+    private String description;
+    //TODO to add javadoc
+    //Possible values : TENTATIVE, CONFIRMED, CANCELLED
+    private Status status;
 
-    public Item() {}
+    public Item() {
+    }
 
     public Item(Type type) {
         this.type = type;
@@ -91,7 +109,7 @@ public class Item {
         this.displayName = displayName;
     }
 
-    @Column(name = "itemname", nullable = false, length=255)
+    @Column(name = "itemname", nullable = false, length = 255)
     @NotNull
     @Length(min = 1, max = 255)
     public String getName() {
@@ -116,7 +134,7 @@ public class Item {
         collection = parent;
     }
 
-    @ManyToOne(targetEntity=CollectionItem.class, fetch=FetchType.LAZY)
+    @ManyToOne(targetEntity = CollectionItem.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "collectionid")
     public CollectionItem getCollection() {
         return collection;
@@ -132,7 +150,7 @@ public class Item {
         this.mimetype = mimetype;
     }
 
-    @Column(name = "calendar", columnDefinition = "CLOB")
+    @Column(name = "calendar", columnDefinition = "text")
     @Lob
     public String getCalendar() {
         return calendar;
@@ -199,12 +217,31 @@ public class Item {
     }
 
     @Enumerated(EnumType.STRING)
-    @Column(name ="type")
+    @Column(name = "type")
     public Type getType() {
         return type;
     }
 
     public void setType(final Type type) {
         this.type = type;
+    }
+
+    @Column(name = "description", columnDefinition = "text")
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

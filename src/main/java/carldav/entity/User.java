@@ -15,12 +15,16 @@
  */
 package carldav.entity;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name="users", uniqueConstraints = {@UniqueConstraint(name = "user_email", columnNames = "email")})
+@Table(name = "users", uniqueConstraints = {@UniqueConstraint(name = "user_email", columnNames = "email")})
 public class User {
 
     private Long id;
@@ -29,6 +33,7 @@ public class User {
     private boolean locked;
     private Set<CollectionItem> collections;
     private String role;
+    private Set<User> managers = new HashSet<>();
 
     @Id
     @GeneratedValue
@@ -42,7 +47,7 @@ public class User {
     }
 
     @NotNull
-    @Column(name = "email", nullable=false)
+    @Column(name = "email", nullable = false)
     public String getEmail() {
         return email;
     }
@@ -82,5 +87,55 @@ public class User {
 
     public void setRole(final String role) {
         this.role = role;
+    }
+
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @JoinTable(name = "USER_MANAGER",
+            joinColumns = {@JoinColumn(name = "ID")},
+            inverseJoinColumns = {@JoinColumn(name = "MANAGER_ID")})
+    public Set<User> getManagers() {
+        return managers;
+    }
+
+    public void setManagers(Set<User> managers) {
+        this.managers = managers;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(id).append(" - ").append(email).append(", managers : [");
+        managers.forEach(manager ->
+                sb.append("\n \t").append(manager.getId()).append(" - ").append(manager.email)
+        );
+        return sb.append("\n]").toString();
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        return new EqualsBuilder()
+                .append(locked, user.locked)
+                .append(id, user.id)
+                .append(password, user.password)
+                .append(email, user.email)
+                .append(role, user.role)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .append(email)
+                .append(locked)
+                .append(role)
+                .toHashCode();
     }
 }

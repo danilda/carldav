@@ -48,4 +48,10 @@ public class CosmoUserDetailsService implements UserDetailsService {
 
         return new User(user.getEmail(), user.getPassword(), true, true, true, accountNonLocked, authorities);
     }
+
+    public boolean isUserManager(String authorizedUserName, String resourceOwnerName) {
+        carldav.entity.User authorizedUser = userRepository.findByEmailIgnoreCase(authorizedUserName);
+        carldav.entity.User resourceOwner = userRepository.findByEmailIgnoreCase(resourceOwnerName);
+        return resourceOwner.getManagers().contains(authorizedUser);
+    }
 }
